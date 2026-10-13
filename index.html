@@ -105,6 +105,10 @@
 			transition: transform 0.3s;
 			border: 3px solid transparent;
 		}
+		.frame-head {
+			overflow: hidden;
+			cursor: pointer;
+		}
 		
 		.frame-option:hover {
 			transform: scale(1.05);
@@ -278,7 +282,7 @@
 	<div class="container">
 		<div class="warn-tip" id="fileWarn">⚠️请勿直接双击打开本HTML，请使用HTTP服务器(LiveServer/Nginx)访问！</div>
 		<header>
-			<div>
+			<div class="frame_head">
 			<img src="https://i.postimg.cc/cJ4yBfbj/mmexport1791856146206.png" crossorigin="anonymous">
 			</div>
 			<p class="subtitle">上传头像，选择头像框，一键生成交院70周年专属头像</p>
