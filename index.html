@@ -40,7 +40,6 @@
 			font-size: 1.1rem;
 			opacity: 0.9;
 		}
-
 		.warn-tip{
 			background:rgba(255,204,0,0.9);
 			color:#222;
@@ -279,7 +278,6 @@
 	<div class="container">
 		<div class="warn-tip" id="fileWarn">⚠️请勿直接双击打开本HTML，请使用HTTP服务器(LiveServer/Nginx)访问！</div>
 		<header>
-			<h1>山东交通学院</h1>
 			<p class="subtitle">上传头像，选择头像框，一键生成交院70周年专属头像</p>
 		</header>
 		
@@ -331,7 +329,7 @@
 						<img src="https://i.postimg.cc/x8pzxGfT/4.png" alt="头像框12" crossorigin="anonymous">
 					</div>
 					<div class="frame-option" data-frame="frame13">
-						<img src="https://i.postimg.cc/cCkn97xs/mmexport1791852205182.png" alt="头像框13" crossorigin="anonymous">
+						<img src="https://i.postimg.cc/7hjWv29s/mmexport1791852205182-(1).png" alt="头像框13" crossorigin="anonymous">
 					</div>
 					<div class="frame-option" data-frame="frame14">
 						<img src="https://i.postimg.cc/XNsdYWw9/mmexport1791852208858.png" alt="头像框14" crossorigin="anonymous">
@@ -343,7 +341,6 @@
 						<img src="https://i.postimg.cc/VvZCG9fv/mmexport1791852214916.png" alt="头像框16" crossorigin="anonymous">
 					</div>
 				</div>
-
 				
 			</div>
 			
@@ -381,11 +378,9 @@
 			if (window.location.protocol === 'file:') {
 				fileWarn.style.display = 'block';
 			}
-
 			const avatarUpload = document.getElementById('avatarUpload');
 			const avatarPreview = document.getElementById('avatarPreview');
 			const framePreview = document.getElementById('framePreview');
-			const customFrameUpload = document.getElementById('customFrameUpload');
 			const frameOptions = document.querySelectorAll('.frame-option');
 			const resetBtn = document.getElementById('resetBtn');
 			const saveBtn = document.getElementById('saveBtn');
@@ -399,7 +394,6 @@
 			let generatedImageUrl = null;      // 生成结果
 			const IMG_TIMEOUT = 8000;
 			const MAX_SIZE = 1200;             // 大图压缩最大边长
-
 			// ========== 统一图片加载工具（关键：crossOrigin） ==========
 			function loadImage(src) {
 				return new Promise((resolve, reject) => {
@@ -411,7 +405,6 @@
 					let timer = setTimeout(() => {
 						reject(new Error('图片加载超时: ' + src.substring(0, 60)));
 					}, IMG_TIMEOUT);
-
 					img.onload = () => {
 						clearTimeout(timer);
 						resolve(img);
@@ -423,7 +416,6 @@
 					img.src = src;
 				});
 			}
-
 			// ========== 将图片 URL 转为 DataURL（用于彻底避免跨域） ==========
 			function urlToDataURL(url) {
 				return new Promise((resolve, reject) => {
@@ -453,7 +445,6 @@
 					img.src = url;
 				});
 			}
-
 			// ========== 大图压缩 ==========
 			function compressImage(img) {
 				const w = img.width || img.naturalWidth;
@@ -467,7 +458,6 @@
 				ctx.drawImage(img, 0, 0, c.width, c.height);
 				return c;
 			}
-
 			// ========== 用 FileReader 读本地文件 ==========
 			function readFileAsDataURL(file) {
 				return new Promise((resolve, reject) => {
@@ -477,7 +467,6 @@
 					reader.readAsDataURL(file);
 				});
 			}
-
 			// ========== 初始化：预先把所有预设头像框转成 DataURL 缓存 ==========
 			const frameDataCache = {}; // { frame1: 'data:image/png;base64,...' }
 			async function preloadFrames() {
@@ -494,12 +483,11 @@
 				}
 				console.log('预设头像框预加载完成');
 			}
-
 			// ========== 上传头像 ==========
 			avatarUpload.addEventListener('click', function () {
 				const input = document.createElement('input');
 				input.type = 'file';
-				input.accept = 'image/*';
+				input.accept = 'image/';
 				input.onchange = async function (e) {
 					const file = e.target.files[0];
 					if (!file) return;
@@ -514,7 +502,6 @@
 				};
 				input.click();
 			});
-
 			// 拖拽上传
 			avatarUpload.addEventListener('dragover', function (e) {
 				e.preventDefault();
@@ -544,13 +531,11 @@
 					alert('请拖入图片文件');
 				}
 			});
-
 			// ========== 选择预设头像框 ==========
 			frameOptions.forEach(option => {
 				option.addEventListener('click', async function () {
 					frameOptions.forEach(opt => opt.classList.remove('active'));
 					this.classList.add('active');
-
 					const key = this.getAttribute('data-frame');
 					// 优先使用预加载的 DataURL
 					const src = frameDataCache[key] || this.querySelector('img').src;
@@ -558,21 +543,6 @@
 					currentFrameSrc = src;
 					resultSection.style.display = 'none';
 				});
-			});
-
-			// ========== 自定义头像框 ==========
-			customFrameUpload.addEventListener('change', async function (e) {
-				const file = e.target.files[0];
-				if (!file) return;
-				try {
-					const dataURL = await readFileAsDataURL(file);
-					framePreview.src = dataURL;
-					currentFrameSrc = dataURL;
-					frameOptions.forEach(opt => opt.classList.remove('active'));
-					resultSection.style.display = 'none';
-				} catch (err) {
-					alert('头像框读取失败：' + err.message);
-				}
 			});
 
 			// ========== 重置 ==========
@@ -584,16 +554,12 @@
 					document.querySelector('.frame-option[data-frame="frame1"] img').src;
 				framePreview.src = defaultSrc;
 				currentFrameSrc = defaultSrc;
-
 				frameOptions.forEach(opt => opt.classList.remove('active'));
 				document.querySelector('.frame-option[data-frame="frame1"]').classList.add('active');
-
 				currentAvatar = null;
-				customFrameUpload.value = '';
 				resultSection.style.display = 'none';
 				generatedImageUrl = null;
 			});
-
 			// ========== 合成头像 ==========
 			saveBtn.addEventListener('click', async function () {
 				if (!currentAvatar) {
@@ -605,33 +571,26 @@
 					currentFrameSrc = frameDataCache['frame1'] ||
 						document.querySelector('.frame-option[data-frame="frame1"] img').src;
 				}
-
 				const canvas = document.createElement('canvas');
 				const ctx = canvas.getContext('2d');
 				canvas.width = 600;
 				canvas.height = 600;
-
 				try {
 					// 1. 加载头像
 					const avatarImgRaw = await loadImage(currentAvatar);
 					const avatarImg = compressImage(avatarImgRaw);
-
 					// 2. 计算等比缩放，居中填充
 					const scale = Math.max(600 / avatarImg.width, 600 / avatarImg.height);
 					const x = 300 - (avatarImg.width * scale) / 2;
 					const y = 300 - (avatarImg.height * scale) / 2;
-
 					// 3. 白色背景
 					ctx.fillStyle = '#FFFFFF';
 					ctx.fillRect(0, 0, 600, 600);
-
 					// 4. 绘制头像
 					ctx.drawImage(avatarImg, x, y, avatarImg.width * scale, avatarImg.height * scale);
-
 					// 5. 加载并绘制头像框（使用 DataURL，不会被污染）
 					const frameImg = await loadImage(currentFrameSrc);
 					ctx.drawImage(frameImg, 0, 0, 600, 600);
-
 					// 6. 导出
 					generatedImageUrl = canvas.toDataURL('image/png', 1.0);
 					resultImage.src = generatedImageUrl;
@@ -642,7 +601,6 @@
 					console.error(err);
 				}
 			});
-
 			// ========== 下载 ==========
 			downloadBtn.addEventListener('click', function () {
 				const isWechat = /MicroMessenger/i.test(navigator.userAgent);
@@ -659,7 +617,6 @@
 					alert('请先生成头像');
 				}
 			});
-
 			// ========== 启动预加载 ==========
 			preloadFrames();
 		});
