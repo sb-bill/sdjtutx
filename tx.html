@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>山东交通学院70周年头像框生成器</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+		
+		body {
+			background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+			color: white;
+			min-height: 100vh;
+			padding: 20px;
+		}
+		
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+		
+		header {
+			text-align: center;
+			margin-bottom: 30px;
+			padding: 20px;
+		}
+		
+		h1 {
+			font-size: 2.5rem;
+			margin-bottom: 10px;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+		}
+		
+		.subtitle {
+			font-size: 1.1rem;
+			opacity: 0.9;
+		}
+
+		.warn-tip{
+			background:rgba(255,204,0,0.9);
+			color:#222;
+			padding:12px;
+			border-radius:10px;
+			text-align:center;
+			margin-bottom:20px;
+			display:none;
+		}
+		
+		.app-container {
+			display: flex;
+			flex-direction: column;
+			gap: 30px;
+		}
+		
+		.upload-section, .preview-section {
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			border-radius: 20px;
+			padding: 25px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+		}
+		
+		.section-title {
+			font-size: 1.5rem;
+			margin-bottom: 20px;
+			border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+			padding-bottom: 10px;
+		}
+		
+		.upload-area {
+			border: 2px dashed rgba(255, 255, 255, 0.5);
+			border-radius: 15px;
+			padding: 40px 20px;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.3s;
+			margin-bottom: 20px;
+		}
+		
+		.upload-area:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.8);
+		}
+		
+		.upload-icon {
+			font-size: 50px;
+			margin-bottom: 15px;
+		}
+		
+		.frame-options {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+			gap: 15px;
+			margin-top: 20px;
+		}
+		
+		.frame-option {
+			border-radius: 10px;
+			overflow: hidden;
+			cursor: pointer;
+			transition: transform 0.3s;
+			border: 3px solid transparent;
+		}
+		
+		.frame-option:hover {
+			transform: scale(1.05);
+		}
+		
+		.frame-option.active {
+			border-color: #ffcc00;
+		}
+		
+		.frame-option img {
+			width: 100%;
+			height: 120px;
+			object-fit: cover;
+		}
+		
+		.preview-container {
+			position: relative;
+			width: 200px;
+			height: 200px;
+			margin: 0 auto 30px;
+			border-radius: 15px;
+			overflow: hidden;
+		}
+		
+		#avatarPreview, #framePreview {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+		
+		#framePreview {
+			z-index: 2;
+			pointer-events: none;
+		}
+		
+		.controls {
+			display: flex;
+			justify-content: center;
+			gap: 15px;
+			margin-top: 20px;
+			flex-wrap: wrap;
+		}
+		
+		button {
+			background: #e67e22;
+			color: white;
+			border: none;
+			padding: 12px 25px;
+			border-radius: 10px;
+			font-size: 1.1rem;
+			cursor: pointer;
+			transition: all 0.3s;
+			font-weight: bold;
+		}
+		
+		button:hover {
+			background: #d35400;
+			transform: translateY(-2px);
+		}
+		
+		.save-btn {
+			background: #f39c12;
+		}
+		
+		.save-btn:hover {
+			background: #e67e22;
+		}
+		
+		.custom-frame-upload {
+			margin-top: 20px;
+		}
+		
+		input[type="file"] {
+			display: none;
+		}
+		
+		.file-label {
+			display: block;
+			background: rgba(255, 255, 255, 0.2);
+			padding: 12px;
+			border-radius: 10px;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.3s;
+		}
+		
+		.file-label:hover {
+			background: rgba(255, 255, 255, 0.3);
+		}
+		
+		.result-section {
+			margin-top: 30px;
+			text-align: center;
+			display: none;
+			animation: fadeIn 0.5s ease;
+		}
+		
+		.result-title {
+			font-size: 1.8rem;
+			margin-bottom: 20px;
+			color: #fff;
+		}
+		
+		.result-container {
+			max-width: 300px;
+			margin: 0 auto 20px;
+			border-radius: 15px;
+			overflow: visible;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+			border: 3px solid rgba(255, 255, 255, 0.3);
+			background: white;
+		}
+		
+		#resultImage {
+			width: 100%;
+			height: auto;
+			display: block;
+			-webkit-touch-callout: default;
+			-webkit-user-select: none;
+			user-select: none;
+			pointer-events: auto;
+			border-radius: 12px;
+		}
+		
+		.result-instruction {
+			background: rgba(255, 255, 255, 0.2);
+			padding: 15px;
+			border-radius: 10px;
+			margin-top: 15px;
+			font-size: 1.1rem;
+		}
+		
+		.result-instruction p {
+			margin-bottom: 8px;
+		}
+		
+		.result-instruction strong {
+			color: #ffcc00;
+			font-size: 1.2rem;
+		}
+		
+		.download-btn {
+			background: #3498db;
+			margin-top: 15px;
+		}
+		
+		.download-btn:hover {
+			background: #2980b9;
+		}
+		
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(20px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+		
+		@media (max-width: 768px) {
+			.preview-container {
+				width: 180px;
+				height: 180px;
+			}
+			.result-container {
+				max-width: 280px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="warn-tip" id="fileWarn">⚠️请勿直接双击打开本HTML，请使用HTTP服务器(LiveServer/Nginx)访问！</div>
+		<header>
+			<h1>山东交通学院</h1>
+			<p class="subtitle">上传头像，选择头像框，一键生成交院70周年专属头像</p>
+		</header>
+		
+		<div class="app-container">
+			<div class="upload-section">
+				<h2 class="section-title">上传头像</h2>
+				<div class="upload-area" id="avatarUpload">
+					<div class="upload-icon">📷</div>
+					<p>点击或拖拽上传头像</p>
+					<p class="subtitle">支持 JPG、PNG 格式</p>
+				</div>
+				
+				<h2 class="section-title">选择头像框</h2>
+				<div class="frame-options">
+					<div class="frame-option active" data-frame="frame1">
+						<img src="https://i.postimg.cc/Hkg7GZMq/13.png" alt="头像框1" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame2">
+						<img src="https://i.postimg.cc/TYQthD9x/7.png" alt="头像框2" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame3">
+						<img src="https://i.postimg.cc/CM9q7Lxd/12.png" alt="头像框3" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame4">
+						<img src="https://i.postimg.cc/V66fQMDS/11.png" alt="头像框4" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame5">
+						<img src="https://i.postimg.cc/rpgVPgG1/10.png" alt="头像框5" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame6">
+						<img src="https://i.postimg.cc/YCnDDWGd/6.png" alt="头像框6" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame7">
+						<img src="https://i.postimg.cc/VsWRHC2K/8.png" alt="头像框7" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame8">
+						<img src="https://i.postimg.cc/3RCg6sf7/9.png" alt="头像框8" crossorigin="anonymous">
+					</div>
+					 <div class="frame-option" data-frame="frame9">
+						<img src="https://i.postimg.cc/HsPwBmns/mmexport1791852217216.png" alt="头像框9" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame10">
+						<img src="https://i.postimg.cc/d3NyHRsw/1.png" alt="头像框10" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame11">
+						<img src="https://i.postimg.cc/4y29LvfX/3.png" alt="头像框11" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame12">
+						<img src="https://i.postimg.cc/x8pzxGfT/4.png" alt="头像框12" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame13">
+						<img src="https://i.postimg.cc/cCkn97xs/mmexport1791852205182.png" alt="头像框13" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame14">
+						<img src="https://i.postimg.cc/XNsdYWw9/mmexport1791852208858.png" alt="头像框14" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame15">
+						<img src="https://i.postimg.cc/4y29Lvfn/mmexport1791852211315.png" alt="头像框15" crossorigin="anonymous">
+					</div>
+					<div class="frame-option" data-frame="frame16">
+						<img src="https://i.postimg.cc/VvZCG9fv/mmexport1791852214916.png" alt="头像框16" crossorigin="anonymous">
+					</div>
+				</div>
+
+				
+			</div>
+			
+			<div class="preview-section">
+				<h2 class="section-title">预览</h2>
+				<div class="preview-container">
+					<img id="avatarPreview" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjxzdmcgeD0iMzUiIHk9IjM1IiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAxNWEzIDMgMCAxIDAgMC02IDMgMyAwIDAgMCAwIDZ6Ii8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiLz48L3N2Zz48L3N2Zz4=" alt="头像预览">
+					<img id="framePreview" src="https://i.postimg.cc/7PKHVBPP/1.png" alt="头像框预览" crossorigin="anonymous">
+				</div>
+				
+				<div class="controls">
+					<button id="resetBtn">重置</button>
+					<button id="saveBtn" class="save-btn">保存头像</button>
+				</div>
+				
+				<div class="result-section" id="resultSection">
+					<h2 class="result-title">您的专属头像已生成！</h2>
+					<div class="result-container">
+						<img id="resultImage" src="" alt="山东交通学院70周年专属头像">
+					</div>
+					<div class="result-instruction">
+						<p><strong>长按图片保存到相册</strong></p>
+						<p>微信用户：长按图片 → 保存到手机</p>
+						<p>其他用户：长按图片或点击下载按钮</p>
+					</div>
+					<button id="downloadBtn" class="download-btn">下载图片</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// 检测file协议
+			const fileWarn = document.getElementById('fileWarn');
+			if (window.location.protocol === 'file:') {
+				fileWarn.style.display = 'block';
+			}
+
+			const avatarUpload = document.getElementById('avatarUpload');
+			const avatarPreview = document.getElementById('avatarPreview');
+			const framePreview = document.getElementById('framePreview');
+			const customFrameUpload = document.getElementById('customFrameUpload');
+			const frameOptions = document.querySelectorAll('.frame-option');
+			const resetBtn = document.getElementById('resetBtn');
+			const saveBtn = document.getElementById('saveBtn');
+			
+			const resultSection = document.getElementById('resultSection');
+			const resultImage = document.getElementById('resultImage');
+			const downloadBtn = document.getElementById('downloadBtn');
+			
+			let currentAvatar = null;          // 头像的 DataURL
+			let currentFrameSrc = null;        // 当前头像框图片地址（URL 或 DataURL）
+			let generatedImageUrl = null;      // 生成结果
+			const IMG_TIMEOUT = 8000;
+			const MAX_SIZE = 1200;             // 大图压缩最大边长
+
+			// ========== 统一图片加载工具（关键：crossOrigin） ==========
+			function loadImage(src) {
+				return new Promise((resolve, reject) => {
+					const img = new Image();
+					// 如果 src 不是 data: 开头，则需要跨域属性
+					if (!src.startsWith('data:')) {
+						img.crossOrigin = 'anonymous';
+					}
+					let timer = setTimeout(() => {
+						reject(new Error('图片加载超时: ' + src.substring(0, 60)));
+					}, IMG_TIMEOUT);
+
+					img.onload = () => {
+						clearTimeout(timer);
+						resolve(img);
+					};
+					img.onerror = () => {
+						clearTimeout(timer);
+						reject(new Error('图片加载失败: ' + src.substring(0, 60)));
+					};
+					img.src = src;
+				});
+			}
+
+			// ========== 将图片 URL 转为 DataURL（用于彻底避免跨域） ==========
+			function urlToDataURL(url) {
+				return new Promise((resolve, reject) => {
+					const img = new Image();
+					img.crossOrigin = 'anonymous';
+					let timer = setTimeout(() => {
+						reject(new Error('转换超时: ' + url.substring(0, 60)));
+					}, IMG_TIMEOUT);
+					img.onload = () => {
+						clearTimeout(timer);
+						try {
+							const c = document.createElement('canvas');
+							c.width = img.naturalWidth;
+							c.height = img.naturalHeight;
+							const ctx = c.getContext('2d');
+							ctx.drawImage(img, 0, 0);
+							// 这里用 toDataURL 把跨域图片"固化"成同源数据
+							resolve(c.toDataURL('image/png'));
+						} catch (e) {
+							reject(e);
+						}
+					};
+					img.onerror = () => {
+						clearTimeout(timer);
+						reject(new Error('加载失败: ' + url.substring(0, 60)));
+					};
+					img.src = url;
+				});
+			}
+
+			// ========== 大图压缩 ==========
+			function compressImage(img) {
+				const w = img.width || img.naturalWidth;
+				const h = img.height || img.naturalHeight;
+				if (w <= MAX_SIZE && h <= MAX_SIZE) return img;
+				const ratio = Math.min(MAX_SIZE / w, MAX_SIZE / h);
+				const c = document.createElement('canvas');
+				c.width = Math.round(w * ratio);
+				c.height = Math.round(h * ratio);
+				const ctx = c.getContext('2d');
+				ctx.drawImage(img, 0, 0, c.width, c.height);
+				return c;
+			}
+
+			// ========== 用 FileReader 读本地文件 ==========
+			function readFileAsDataURL(file) {
+				return new Promise((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onload = e => resolve(e.target.result);
+					reader.onerror = () => reject(new Error('读取文件失败'));
+					reader.readAsDataURL(file);
+				});
+			}
+
+			// ========== 初始化：预先把所有预设头像框转成 DataURL 缓存 ==========
+			const frameDataCache = {}; // { frame1: 'data:image/png;base64,...' }
+			async function preloadFrames() {
+				for (const opt of frameOptions) {
+					const img = opt.querySelector('img');
+					const url = img.src;
+					const key = opt.getAttribute('data-frame');
+					try {
+						frameDataCache[key] = await urlToDataURL(url);
+					} catch (e) {
+						console.warn('预设头像框预加载失败，将使用原始 URL：', key, e.message);
+						frameDataCache[key] = url; // 降级
+					}
+				}
+				console.log('预设头像框预加载完成');
+			}
+
+			// ========== 上传头像 ==========
+			avatarUpload.addEventListener('click', function () {
+				const input = document.createElement('input');
+				input.type = 'file';
+				input.accept = 'image/*';
+				input.onchange = async function (e) {
+					const file = e.target.files[0];
+					if (!file) return;
+					try {
+						const dataURL = await readFileAsDataURL(file);
+						avatarPreview.src = dataURL;
+						currentAvatar = dataURL;
+						resultSection.style.display = 'none';
+					} catch (err) {
+						alert('头像读取失败：' + err.message);
+					}
+				};
+				input.click();
+			});
+
+			// 拖拽上传
+			avatarUpload.addEventListener('dragover', function (e) {
+				e.preventDefault();
+				avatarUpload.style.background = 'rgba(255, 255, 255, 0.2)';
+			});
+			avatarUpload.addEventListener('dragleave', function () {
+				avatarUpload.style.background = '';
+			});
+			avatarUpload.addEventListener('drop', async function (e) {
+				e.preventDefault();
+				avatarUpload.style.background = '';
+				const files = e.dataTransfer.files;
+				if (files.length > 1) {
+					alert('仅支持上传 1 张头像，只读取第一个文件');
+				}
+				const file = files[0];
+				if (file && file.type.startsWith('image/')) {
+					try {
+						const dataURL = await readFileAsDataURL(file);
+						avatarPreview.src = dataURL;
+						currentAvatar = dataURL;
+						resultSection.style.display = 'none';
+					} catch (err) {
+						alert('头像读取失败：' + err.message);
+					}
+				} else {
+					alert('请拖入图片文件');
+				}
+			});
+
+			// ========== 选择预设头像框 ==========
+			frameOptions.forEach(option => {
+				option.addEventListener('click', async function () {
+					frameOptions.forEach(opt => opt.classList.remove('active'));
+					this.classList.add('active');
+
+					const key = this.getAttribute('data-frame');
+					// 优先使用预加载的 DataURL
+					const src = frameDataCache[key] || this.querySelector('img').src;
+					framePreview.src = src;
+					currentFrameSrc = src;
+					resultSection.style.display = 'none';
+				});
+			});
+
+			// ========== 自定义头像框 ==========
+			customFrameUpload.addEventListener('change', async function (e) {
+				const file = e.target.files[0];
+				if (!file) return;
+				try {
+					const dataURL = await readFileAsDataURL(file);
+					framePreview.src = dataURL;
+					currentFrameSrc = dataURL;
+					frameOptions.forEach(opt => opt.classList.remove('active'));
+					resultSection.style.display = 'none';
+				} catch (err) {
+					alert('头像框读取失败：' + err.message);
+				}
+			});
+
+			// ========== 重置 ==========
+			resetBtn.addEventListener('click', function () {
+				avatarPreview.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjxzdmcgeD0iMzUiIHk9IjM1IiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAxNWEzIDMgMCAxIDAgMC02IDMgMyAwIDAgMCAwIDZ6Ii8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiLz48L3N2Zz48L3N2Zz4=';
+				// 重置回默认第 1 个头像框（用预加载的 DataURL）
+				const defaultKey = 'frame1';
+				const defaultSrc = frameDataCache[defaultKey] ||
+					document.querySelector('.frame-option[data-frame="frame1"] img').src;
+				framePreview.src = defaultSrc;
+				currentFrameSrc = defaultSrc;
+
+				frameOptions.forEach(opt => opt.classList.remove('active'));
+				document.querySelector('.frame-option[data-frame="frame1"]').classList.add('active');
+
+				currentAvatar = null;
+				customFrameUpload.value = '';
+				resultSection.style.display = 'none';
+				generatedImageUrl = null;
+			});
+
+			// ========== 合成头像 ==========
+			saveBtn.addEventListener('click', async function () {
+				if (!currentAvatar) {
+					alert('请先上传头像！');
+					return;
+				}
+				if (!currentFrameSrc) {
+					// 兜底：使用默认框
+					currentFrameSrc = frameDataCache['frame1'] ||
+						document.querySelector('.frame-option[data-frame="frame1"] img').src;
+				}
+
+				const canvas = document.createElement('canvas');
+				const ctx = canvas.getContext('2d');
+				canvas.width = 600;
+				canvas.height = 600;
+
+				try {
+					// 1. 加载头像
+					const avatarImgRaw = await loadImage(currentAvatar);
+					const avatarImg = compressImage(avatarImgRaw);
+
+					// 2. 计算等比缩放，居中填充
+					const scale = Math.max(600 / avatarImg.width, 600 / avatarImg.height);
+					const x = 300 - (avatarImg.width * scale) / 2;
+					const y = 300 - (avatarImg.height * scale) / 2;
+
+					// 3. 白色背景
+					ctx.fillStyle = '#FFFFFF';
+					ctx.fillRect(0, 0, 600, 600);
+
+					// 4. 绘制头像
+					ctx.drawImage(avatarImg, x, y, avatarImg.width * scale, avatarImg.height * scale);
+
+					// 5. 加载并绘制头像框（使用 DataURL，不会被污染）
+					const frameImg = await loadImage(currentFrameSrc);
+					ctx.drawImage(frameImg, 0, 0, 600, 600);
+
+					// 6. 导出
+					generatedImageUrl = canvas.toDataURL('image/png', 1.0);
+					resultImage.src = generatedImageUrl;
+					resultSection.style.display = 'block';
+					resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				} catch (err) {
+					alert('合成失败：' + err.message);
+					console.error(err);
+				}
+			});
+
+			// ========== 下载 ==========
+			downloadBtn.addEventListener('click', function () {
+				const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+				if (isWechat) {
+					alert('微信浏览器不支持直接下载，请长按图片保存！');
+					return;
+				}
+				if (generatedImageUrl) {
+					const link = document.createElement('a');
+					link.download = '山东交通学院70周年专属头像.png';
+					link.href = generatedImageUrl;
+					link.click();
+				} else {
+					alert('请先生成头像');
+				}
+			});
+
+			// ========== 启动预加载 ==========
+			preloadFrames();
+		});
+	</script>
+</body>
+</html>
